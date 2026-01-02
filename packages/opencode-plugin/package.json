@@ -1,0 +1,15 @@
+{
+  "name": "opencode-web-blocker-plugin",
+  "version": "0.0.1",
+  "type": "module",
+  "main": "index.ts",
+  "scripts": {
+    "check": "tsc --noEmit"
+  },
+  "dependencies": {
+    "opencode-web-blocker-shared": "workspace:*"
+  },
+  "devDependencies": {
+    "@opencode-ai/plugin": "*"
+  }
+}

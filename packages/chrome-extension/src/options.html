@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>opencode blocker - Settings</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: #0f172a;
+      color: white;
+      min-height: 100vh;
+      padding: 32px;
+    }
+    .container {
+      max-width: 600px;
+      margin: 0 auto;
+    }
+    h1 {
+      font-size: 24px;
+      margin-bottom: 8px;
+    }
+    .subtitle {
+      color: #94a3b8;
+      margin-bottom: 32px;
+    }
+    .section {
+      background: #1e293b;
+      border-radius: 12px;
+      padding: 24px;
+      margin-bottom: 24px;
+    }
+    .section-title {
+      font-size: 16px;
+      font-weight: 600;
+      margin-bottom: 16px;
+    }
+    .domain-list {
+      list-style: none;
+    }
+    .domain-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px;
+      background: #334155;
+      border-radius: 8px;
+      margin-bottom: 8px;
+    }
+    .domain-item button {
+      background: #ef4444;
+      border: none;
+      color: white;
+      padding: 6px 12px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 12px;
+    }
+    .domain-item button:hover {
+      background: #dc2626;
+    }
+    .add-domain {
+      display: flex;
+      gap: 8px;
+      margin-top: 16px;
+    }
+    .add-domain input {
+      flex: 1;
+      padding: 12px;
+      background: #334155;
+      border: 1px solid #475569;
+      border-radius: 8px;
+      color: white;
+      font-size: 14px;
+    }
+    .add-domain input:focus {
+      outline: none;
+      border-color: #3b82f6;
+    }
+    .add-domain button {
+      padding: 12px 24px;
+      background: #3b82f6;
+      border: none;
+      border-radius: 8px;
+      color: white;
+      cursor: pointer;
+      font-size: 14px;
+    }
+    .add-domain button:hover {
+      background: #2563eb;
+    }
+    .error {
+      color: #ef4444;
+      font-size: 13px;
+      margin-top: 8px;
+    }
+    .bypass-section {
+      text-align: center;
+    }
+    .bypass-btn {
+      padding: 12px 32px;
+      background: #475569;
+      border: none;
+      border-radius: 8px;
+      color: white;
+      cursor: pointer;
+      font-size: 14px;
+    }
+    .bypass-btn:hover:not(:disabled) {
+      background: #64748b;
+    }
+    .bypass-btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+    .bypass-status {
+      margin-top: 12px;
+      color: #94a3b8;
+      font-size: 13px;
+    }
+    .bypass-duration {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+    .bypass-duration label {
+      color: #94a3b8;
+      font-size: 14px;
+    }
+    .bypass-duration input {
+      width: 100px;
+      padding: 8px 12px;
+      background: #334155;
+      border: 1px solid #475569;
+      border-radius: 8px;
+      color: white;
+      font-size: 14px;
+      text-align: center;
+    }
+    .bypass-duration input:focus {
+      outline: none;
+      border-color: #3b82f6;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>opencode blocker</h1>
+    <p class="subtitle">Block distracting websites unless OpenCode is working</p>
+    
+    <div class="section">
+      <div class="section-title">Blocked Sites</div>
+      <ul class="domain-list" id="domain-list"></ul>
+      <div class="add-domain">
+        <input type="text" id="new-domain" placeholder="Enter domain (e.g., reddit.com)">
+        <button id="add-btn">Add</button>
+      </div>
+      <div class="error" id="error"></div>
+    </div>
+    
+    <div class="section bypass-section">
+      <div class="section-title">Emergency Bypass</div>
+      <div class="bypass-duration">
+        <label for="bypass-duration">Duration (seconds):</label>
+        <input type="number" id="bypass-duration" min="5" max="3600" value="300">
+      </div>
+      <button class="bypass-btn" id="bypass-btn">Activate Bypass</button>
+      <div class="bypass-status" id="bypass-status"></div>
+    </div>
+  </div>
+  
+  <script src="options.js"></script>
+</body>
+</html>

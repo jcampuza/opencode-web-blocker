@@ -1,0 +1,14 @@
+{
+  "name": "chrome-extension",
+  "version": "0.0.1",
+  "type": "module",
+  "scripts": {
+    "build": "bun build src/service-worker.ts --outdir=dist && bun build src/content-script.ts --outdir=dist && bun build src/popup.ts --outdir=dist && bun build src/options.ts --outdir=dist && cp manifest.json dist/ && cp -r src/*.html dist/ && cp -r icons dist/",
+    "dev": "bun run build && bun run dev:watch",
+    "dev:watch": "bun build src/service-worker.ts src/content-script.ts src/popup.ts src/options.ts --outdir=dist --watch",
+    "check": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "@types/chrome": "^0.0.287"
+  }
+}

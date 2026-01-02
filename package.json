@@ -1,15 +1,19 @@
 {
-  "name": "opencode-block",
+  "name": "opencode-web-blocker",
   "private": true,
   "workspaces": [
-    "server",
-    "chrome-extension",
-    "opencode-plugin"
+    "packages/shared",
+    "packages/server",
+    "packages/chrome-extension",
+    "packages/opencode-plugin"
   ],
-  "devDependencies": {
-    "@types/bun": "latest"
+  "scripts": {
+    "dev": "bun --filter '*' dev",
+    "build": "bun --filter '*' build",
+    "check": "bun --filter '*' check"
   },
-  "peerDependencies": {
+  "devDependencies": {
+    "@types/bun": "latest",
     "typescript": "^5"
   }
 }
