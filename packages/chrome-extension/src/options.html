@@ -144,6 +144,34 @@
       outline: none;
       border-color: #3b82f6;
     }
+    .port-setting {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .port-setting label {
+      color: #94a3b8;
+      font-size: 14px;
+    }
+    .port-setting input {
+      width: 100px;
+      padding: 8px 12px;
+      background: #334155;
+      border: 1px solid #475569;
+      border-radius: 8px;
+      color: white;
+      font-size: 14px;
+      text-align: center;
+    }
+    .port-setting input:focus {
+      outline: none;
+      border-color: #3b82f6;
+    }
+    .port-hint {
+      color: #64748b;
+      font-size: 12px;
+      margin-top: 8px;
+    }
   </style>
 </head>
 <body>
@@ -161,6 +189,15 @@
       <div class="error" id="error"></div>
     </div>
     
+    <div class="section">
+      <div class="section-title">Server Settings</div>
+      <div class="port-setting">
+        <label for="server-port">Server Port:</label>
+        <input type="number" id="server-port" min="1" max="65535" value="8765">
+      </div>
+      <div class="port-hint">Default: 8765. Change if running server on a different port.</div>
+    </div>
+
     <div class="section bypass-section">
       <div class="section-title">Emergency Bypass</div>
       <div class="bypass-duration">

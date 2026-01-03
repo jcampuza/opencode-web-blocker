@@ -10,20 +10,14 @@
   "scripts": {
     "dev": "bun --filter '*' dev",
     "build": "bun --filter '*' build",
+    "start": "bun --filter '*' start",
     "check": "bun --filter '*' check",
-    "lint": "eslint packages/*/src/**/*.ts packages/*/index.ts",
-    "lint:fix": "eslint packages/*/src/**/*.ts packages/*/index.ts --fix",
-    "format": "prettier --write \"packages/**/*.{ts,json}\"",
-    "format:check": "prettier --check \"packages/**/*.{ts,json}\"",
-    "type-check": "bun run check"
+    "type-check": "bun run check",
+    "publish:plugin": "bun scripts/publish.ts plugin",
+    "publish:server": "bun scripts/publish.ts server"
   },
   "devDependencies": {
     "@types/bun": "latest",
-    "@typescript-eslint/eslint-plugin": "^6.0.0",
-    "@typescript-eslint/parser": "^6.0.0",
-    "eslint": "^8.0.0",
-    "eslint-config-prettier": "^9.0.0",
-    "prettier": "^3.0.0",
     "typescript": "^5"
   }
 }

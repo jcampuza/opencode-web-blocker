@@ -1,15 +1,48 @@
 {
-  "name": "opencode-web-blocker-plugin",
+  "name": "@jcamps/opencode-web-blocker-plugin",
+  "private": false,
   "version": "0.0.1",
+  "description": "OpenCode plugin that blocks distracting websites when you're not actively working",
   "type": "module",
-  "main": "index.ts",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
   "scripts": {
+    "build": "bun build index.ts --outdir dist --target bun --format esm && tsc --emitDeclarationOnly --outDir dist",
+    "clean": "rm -rf dist",
+    "prepublishOnly": "bun run clean && bun run build",
     "check": "tsc --noEmit"
   },
-  "dependencies": {
-    "opencode-web-blocker-shared": "workspace:*"
+  "keywords": [
+    "opencode",
+    "plugin",
+    "blocker",
+    "productivity",
+    "focus"
+  ],
+  "author": "",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/josephcampuzano/opencode-block.git"
+  },
+  "bugs": {
+    "url": "https://github.com/josephcampuzano/opencode-block/issues"
+  },
+  "homepage": "https://github.com/josephcampuzano/opencode-block#readme",
+  "peerDependencies": {
+    "@jcamps/opencode-web-blocker-shared": "workspace:*"
   },
   "devDependencies": {
-    "@opencode-ai/plugin": "*"
+    "@opencode-ai/plugin": "*",
+    "typescript": "^5"
   }
 }

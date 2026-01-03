@@ -1,9 +1,19 @@
-const WS_URL = "ws://localhost:8765/ws";
+const DEFAULT_PORT = 8765;
 const KEEPALIVE_INTERVAL = 20000;
 const RECONNECT_DELAY_BASE = 1000;
 const RECONNECT_DELAY_MAX = 30000;
 const DEFAULT_BLOCKED_DOMAINS = ["x.com", "twitter.com", "youtube.com"];
 const BYPASS_DURATION_MS = 10 * 1000;
+
+let serverPort = DEFAULT_PORT;
+
+function getWsUrl(): string {
+  return `ws://localhost:${serverPort}/ws`;
+}
+
+function getStatusUrl(): string {
+  return `http://localhost:${serverPort}/status`;
+}
 
 interface State {
   serverConnected: boolean;
@@ -63,7 +73,7 @@ function connect() {
     ws = null;
   }
 
-  ws = new WebSocket(WS_URL);
+  ws = new WebSocket(getWsUrl());
 
   ws.onopen = () => {
     state.serverConnected = true;
@@ -107,17 +117,17 @@ function connect() {
   };
 }
 
-chrome.storage.sync.get(["blockedDomains"], (result) => {
+chrome.storage.sync.get(["blockedDomains", "serverPort"], (result) => {
   if (!result.blockedDomains) {
     chrome.storage.sync.set({ blockedDomains: DEFAULT_BLOCKED_DOMAINS });
   }
+  serverPort = result.serverPort || DEFAULT_PORT;
+  connect();
 });
-
-connect();
 
 async function fetchServerStatus(): Promise<{ working: number; waitingForInput: number; sessions: number; blocked: boolean } | null> {
   try {
-    const response = await fetch("http://localhost:8765/status", { signal: AbortSignal.timeout(2000) });
+    const response = await fetch(getStatusUrl(), { signal: AbortSignal.timeout(2000) });
     if (response.ok) {
       return await response.json();
     }
@@ -143,9 +153,12 @@ chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
   }
 
   if (message.type === "RETRY_CONNECTION") {
-    reconnectDelay = RECONNECT_DELAY_BASE;
-    connect();
-    sendResponse({ success: true });
+    chrome.storage.sync.get(["serverPort"], (result) => {
+      serverPort = result.serverPort || DEFAULT_PORT;
+      reconnectDelay = RECONNECT_DELAY_BASE;
+      connect();
+      sendResponse({ success: true });
+    });
     return true;
   }
 

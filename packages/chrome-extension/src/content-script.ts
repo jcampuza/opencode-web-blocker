@@ -151,7 +151,7 @@ function createModal() {
     <button class="bypass-btn" id="bypass-btn">Emergency Bypass</button>
     <button class="retry-btn hidden" id="retry-btn">Retry Connection</button>
     <div class="server-info hidden" id="server-info">
-      Start the server with <code>bun run dev</code> in the opencode-block directory
+      Start the server with <code>bunx @opencode-web-blocker/server</code>
     </div>
   `;
 

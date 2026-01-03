@@ -1,15 +1,43 @@
 {
-  "name": "opencode-web-blocker-server",
+  "name": "@jcamps/opencode-web-blocker-server",
+  "private": false,
   "version": "0.0.1",
+  "description": "WebSocket server for opencode-web-blocker - blocks distracting sites when OpenCode is idle",
   "type": "module",
-  "main": "index.ts",
+  "main": "dist/server.js",
+  "bin": {
+    "opencode-web-blocker": "./dist/bin.js"
+  },
+  "files": [
+    "dist"
+  ],
+  "exports": {
+    ".": {
+      "import": "./dist/server.js"
+    }
+  },
   "scripts": {
-    "dev": "bun run index.ts ",
+    "dev": "bun --hot bin.ts",
+    "build": "bun build bin.ts --outdir dist --target bun --format esm",
+    "clean": "rm -rf dist",
+    "prepublishOnly": "bun run clean && bun run build",
     "check": "tsc --noEmit",
-    "build": "bun build --compile --minify index.ts --outfile dist/server.ts",
-    "start": "./dist/server.ts"
+    "start": "bun dist/bin.js"
+  },
+  "keywords": [
+    "opencode",
+    "blocker",
+    "productivity",
+    "focus",
+    "websocket"
+  ],
+  "author": "",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/josephcampuzano/opencode-block.git"
   },
   "dependencies": {
-    "opencode-web-blocker-shared": "workspace:*"
+    "@jcamps/opencode-web-blocker-shared": "workspace:*"
   }
 }

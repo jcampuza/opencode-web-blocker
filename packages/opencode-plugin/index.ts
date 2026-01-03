@@ -1,5 +1,16 @@
 import type { Plugin } from "@opencode-ai/plugin";
-import { DEFAULT_PORT, USER_INPUT_TOOLS, type HookPayload } from "opencode-web-blocker-shared";
+
+// Inlined from shared package for standalone npm publishing
+const DEFAULT_PORT = 8765;
+const USER_INPUT_TOOLS = ["ask_user", "ask_human", "AskUserQuestion"];
+
+interface HookPayload {
+  session_id: string;
+  hook_event_name: "UserPromptSubmit" | "PreToolUse" | "Stop" | "SessionStart" | "SessionEnd";
+  tool_name?: string;
+  tool_input?: Record<string, unknown>;
+  cwd?: string;
+}
 
 const SERVER_URL = `http://localhost:${DEFAULT_PORT}/hook`;
 

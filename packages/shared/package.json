@@ -1,5 +1,6 @@
 {
-  "name": "opencode-web-blocker-shared",
+  "name": "@jcamps/opencode-web-blocker-shared",
+  "private": false,
   "version": "0.0.1",
   "type": "module",
   "main": "index.ts",

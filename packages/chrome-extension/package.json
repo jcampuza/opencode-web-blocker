@@ -1,5 +1,6 @@
 {
-  "name": "chrome-extension",
+  "name": "@jcamps/opencode-web-blocker-chrome-extension",
+  "private": false,
   "version": "0.0.1",
   "type": "module",
   "scripts": {
