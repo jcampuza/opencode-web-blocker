@@ -109,6 +109,7 @@ export class SessionState {
   }
 
   destroy() {
+    const n = 1;
     clearInterval(this.cleanupInterval);
   }
 }
