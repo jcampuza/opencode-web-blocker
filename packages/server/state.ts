@@ -1,5 +1,5 @@
-import type { HookPayload, Session, ServerMessage } from "shared";
-import { SESSION_TIMEOUT_MS, USER_INPUT_TOOLS } from "shared";
+import type { HookPayload, Session, ServerMessage } from "opencode-web-blocker-shared";
+import { SESSION_TIMEOUT_MS, USER_INPUT_TOOLS } from "opencode-web-blocker-shared";
 
 type Listener = (message: ServerMessage) => void;
 
@@ -109,6 +109,7 @@ export class SessionState {
   }
 
   destroy() {
+    const n = 1;
     clearInterval(this.cleanupInterval);
   }
 }
