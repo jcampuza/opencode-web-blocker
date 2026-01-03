@@ -1,5 +1,5 @@
-import type { HookPayload, Session, ServerMessage } from "opencode-web-blocker-shared";
-import { SESSION_TIMEOUT_MS, USER_INPUT_TOOLS } from "opencode-web-blocker-shared";
+import type { HookPayload, Session, ServerMessage } from '@jcamps/opencode-web-blocker-shared';
+import { SESSION_TIMEOUT_MS, USER_INPUT_TOOLS } from '@jcamps/opencode-web-blocker-shared';
 
 type Listener = (message: ServerMessage) => void;
 
@@ -18,7 +18,7 @@ export class SessionState {
   }
 
   private broadcast() {
-    const message: ServerMessage = { type: "state", ...this.getPublicState() };
+    const message: ServerMessage = { type: 'state', ...this.getPublicState() };
     for (const listener of this.listeners) {
       listener(message);
     }
@@ -29,8 +29,8 @@ export class SessionState {
     let waitingForInput = 0;
 
     for (const session of this.sessions.values()) {
-      if (session.status === "working") working++;
-      if (session.status === "waiting_for_input") waitingForInput++;
+      if (session.status === 'working') working++;
+      if (session.status === 'waiting_for_input') waitingForInput++;
     }
 
     const blocked = working === 0 && waitingForInput === 0;
@@ -47,35 +47,35 @@ export class SessionState {
     const { session_id, hook_event_name, tool_name, cwd } = payload;
 
     switch (hook_event_name) {
-      case "SessionStart":
+      case 'SessionStart':
         this.sessions.set(session_id, {
           id: session_id,
-          status: "idle",
+          status: 'idle',
           cwd,
           lastActivity: Date.now(),
         });
         break;
 
-      case "SessionEnd":
+      case 'SessionEnd':
         this.sessions.delete(session_id);
         break;
 
-      case "UserPromptSubmit":
-        this.updateSession(session_id, "working");
+      case 'UserPromptSubmit':
+        this.updateSession(session_id, 'working');
         break;
 
-      case "Stop":
-        this.updateSession(session_id, "idle");
+      case 'Stop':
+        this.updateSession(session_id, 'idle');
         break;
 
-      case "PreToolUse":
+      case 'PreToolUse':
         if (tool_name && USER_INPUT_TOOLS.includes(tool_name)) {
-          this.updateSession(session_id, "waiting_for_input");
+          this.updateSession(session_id, 'waiting_for_input');
         } else {
           setTimeout(() => {
             const session = this.sessions.get(session_id);
-            if (session?.status === "waiting_for_input") {
-              this.updateSession(session_id, "working");
+            if (session?.status === 'waiting_for_input') {
+              this.updateSession(session_id, 'working');
             }
           }, 500);
         }
@@ -85,7 +85,7 @@ export class SessionState {
     this.broadcast();
   }
 
-  private updateSession(id: string, status: Session["status"]) {
+  private updateSession(id: string, status: Session['status']) {
     const session = this.sessions.get(id);
     if (session) {
       session.status = status;
