@@ -5,6 +5,7 @@
     "packages/shared",
     "packages/server",
     "packages/chrome-extension",
+    "packages/zen-extension",
     "packages/opencode-plugin"
   ],
   "scripts": {

@@ -1,0 +1,183 @@
+import browser from "webextension-polyfill";
+
+const DEFAULT_PORT = 8765;
+const KEEPALIVE_INTERVAL = 20000;
+const RECONNECT_DELAY_BASE = 1000;
+const RECONNECT_DELAY_MAX = 30000;
+const DEFAULT_BLOCKED_DOMAINS = ["x.com", "twitter.com", "youtube.com"];
+const BYPASS_DURATION_MS = 10 * 1000;
+
+let serverPort = DEFAULT_PORT;
+
+function getWsUrl(): string {
+  return `ws://localhost:${serverPort}/ws`;
+}
+
+function getStatusUrl(): string {
+  return `http://localhost:${serverPort}/status`;
+}
+
+interface State {
+  serverConnected: boolean;
+  sessions: number;
+  working: number;
+  waitingForInput: number;
+  bypassUntil: number | null;
+}
+
+const state: State = {
+  serverConnected: false,
+  sessions: 0,
+  working: 0,
+  waitingForInput: 0,
+  bypassUntil: null,
+};
+
+let ws: WebSocket | null = null;
+let reconnectDelay = RECONNECT_DELAY_BASE;
+let keepaliveInterval: ReturnType<typeof setInterval> | null = null;
+let bypassTimeout: ReturnType<typeof setTimeout> | null = null;
+
+async function getPublicState() {
+  const bypassActive = state.bypassUntil !== null && state.bypassUntil > Date.now();
+  const isIdle = state.working === 0 && state.waitingForInput === 0;
+  const shouldBlock = !bypassActive && (isIdle || !state.serverConnected);
+
+  const storage = await browser.storage.sync.get(["bypassDuration"]);
+  const bypassDuration = storage.bypassDuration || BYPASS_DURATION_MS / 1000;
+
+  return {
+    serverConnected: state.serverConnected,
+    sessions: state.sessions,
+    working: state.working,
+    waitingForInput: state.waitingForInput,
+    blocked: shouldBlock,
+    bypassActive,
+    bypassUntil: state.bypassUntil,
+    bypassDuration,
+  };
+}
+
+async function broadcast() {
+  const publicState = await getPublicState();
+  const tabs = await browser.tabs.query({});
+  for (const tab of tabs) {
+    if (tab.id) {
+      browser.tabs.sendMessage(tab.id, { type: "STATE", ...publicState }).catch(() => {});
+    }
+  }
+}
+
+function connect() {
+  if (ws) {
+    ws.close();
+    ws = null;
+  }
+
+  ws = new WebSocket(getWsUrl());
+
+  ws.onopen = () => {
+    state.serverConnected = true;
+    reconnectDelay = RECONNECT_DELAY_BASE;
+    broadcast();
+
+    if (keepaliveInterval) clearInterval(keepaliveInterval);
+    keepaliveInterval = setInterval(() => {
+      if (ws?.readyState === WebSocket.OPEN) {
+        ws.send(JSON.stringify({ type: "ping" }));
+      }
+    }, KEEPALIVE_INTERVAL);
+  };
+
+  ws.onmessage = (event) => {
+    try {
+      const data = JSON.parse(event.data);
+      if (data.type === "state") {
+        state.sessions = data.sessions;
+        state.working = data.working;
+        state.waitingForInput = data.waitingForInput;
+        broadcast();
+      }
+    } catch {}
+  };
+
+  ws.onclose = () => {
+    state.serverConnected = false;
+    ws = null;
+    if (keepaliveInterval) {
+      clearInterval(keepaliveInterval);
+      keepaliveInterval = null;
+    }
+    broadcast();
+    setTimeout(connect, reconnectDelay);
+    reconnectDelay = Math.min(reconnectDelay * 2, RECONNECT_DELAY_MAX);
+  };
+
+  ws.onerror = () => {
+    ws?.close();
+  };
+}
+
+browser.storage.sync.get(["blockedDomains", "serverPort"]).then((result) => {
+  if (!result.blockedDomains) {
+    browser.storage.sync.set({ blockedDomains: DEFAULT_BLOCKED_DOMAINS });
+  }
+  serverPort = (result.serverPort as number) || DEFAULT_PORT;
+  connect();
+});
+
+async function fetchServerStatus(): Promise<{ working: number; waitingForInput: number; sessions: number; blocked: boolean } | null> {
+  try {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 2000);
+    const response = await fetch(getStatusUrl(), { signal: controller.signal });
+    clearTimeout(timeoutId);
+    if (response.ok) {
+      return await response.json();
+    }
+  } catch {}
+  return null;
+}
+
+browser.runtime.onMessage.addListener((message) => {
+  if (message.type === "GET_STATE") {
+    return (async () => {
+      if (!state.serverConnected) {
+        const serverState = await fetchServerStatus();
+        if (serverState) {
+          state.serverConnected = true;
+          state.sessions = serverState.sessions;
+          state.working = serverState.working;
+          state.waitingForInput = serverState.waitingForInput;
+        }
+      }
+      return await getPublicState();
+    })();
+  }
+
+  if (message.type === "RETRY_CONNECTION") {
+    return browser.storage.sync.get(["serverPort"]).then((result) => {
+      serverPort = (result.serverPort as number) || DEFAULT_PORT;
+      reconnectDelay = RECONNECT_DELAY_BASE;
+      connect();
+      return { success: true };
+    });
+  }
+
+  if (message.type === "ACTIVATE_BYPASS") {
+    return browser.storage.sync.get(["bypassDuration"]).then((result) => {
+      const durationMs = ((result.bypassDuration as number) || BYPASS_DURATION_MS / 1000) * 1000;
+      const bypassUntil = Date.now() + durationMs;
+      state.bypassUntil = bypassUntil;
+      
+      if (bypassTimeout) clearTimeout(bypassTimeout);
+      bypassTimeout = setTimeout(() => {
+        state.bypassUntil = null;
+        broadcast();
+      }, durationMs);
+      
+      broadcast();
+      return { success: true, bypassUntil };
+    });
+  }
+});

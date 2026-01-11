@@ -54,28 +54,34 @@ export class SessionState {
           cwd,
           lastActivity: Date.now(),
         });
+        console.log(`[OpenCode] Session started: ${session_id.slice(0, 8)}... (cwd: ${cwd || 'N/A'})`);
         break;
 
       case 'SessionEnd':
         this.sessions.delete(session_id);
+        console.log(`[OpenCode] Session ended: ${session_id.slice(0, 8)}...`);
         break;
 
       case 'UserPromptSubmit':
         this.updateSession(session_id, 'working');
+        console.log(`[OpenCode] Working: ${session_id.slice(0, 8)}... - User prompt submitted`);
         break;
 
       case 'Stop':
         this.updateSession(session_id, 'idle');
+        console.log(`[OpenCode] Idle: ${session_id.slice(0, 8)}... - Session stopped`);
         break;
 
       case 'PreToolUse':
         if (tool_name && USER_INPUT_TOOLS.includes(tool_name)) {
           this.updateSession(session_id, 'waiting_for_input');
+          console.log(`[OpenCode] Waiting for input: ${session_id.slice(0, 8)}... - Tool: ${tool_name}`);
         } else {
           setTimeout(() => {
             const session = this.sessions.get(session_id);
             if (session?.status === 'waiting_for_input') {
               this.updateSession(session_id, 'working');
+              console.log(`[OpenCode] Working: ${session_id.slice(0, 8)}... - Resumed after tool: ${tool_name || 'unknown'}`);
             }
           }, 500);
         }

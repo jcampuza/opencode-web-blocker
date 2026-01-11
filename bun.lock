@@ -1,6 +1,5 @@
 {
   "lockfileVersion": 1,
-  "configVersion": 1,
   "workspaces": {
     "": {
       "name": "opencode-web-blocker",
@@ -41,6 +40,14 @@
       "name": "@jcamps/opencode-web-blocker-shared",
       "version": "0.0.1",
     },
+    "packages/zen-extension": {
+      "name": "@jcamps/opencode-web-blocker-zen-extension",
+      "version": "0.0.1",
+      "devDependencies": {
+        "@types/webextension-polyfill": "^0.10.7",
+        "webextension-polyfill": "^0.12.0",
+      },
+    },
   },
   "packages": {
     "@jcamps/opencode-web-blocker-chrome-extension": ["@jcamps/opencode-web-blocker-chrome-extension@workspace:packages/chrome-extension"],
@@ -50,6 +57,8 @@
     "@jcamps/opencode-web-blocker-server": ["@jcamps/opencode-web-blocker-server@workspace:packages/server"],
 
     "@jcamps/opencode-web-blocker-shared": ["@jcamps/opencode-web-blocker-shared@workspace:packages/shared"],
+
+    "@jcamps/opencode-web-blocker-zen-extension": ["@jcamps/opencode-web-blocker-zen-extension@workspace:packages/zen-extension"],
 
     "@opencode-ai/plugin": ["@opencode-ai/plugin@1.0.224", "", { "dependencies": { "@opencode-ai/sdk": "1.0.224", "zod": "4.1.8" } }, "sha512-V2Su55FI6NGyabFHo853+8r9h66q//gsYWCIODbwRs47qi4VfbFylfddJxQDD+/M/H7w0++ojbQC9YCLNDXdKw=="],
 
@@ -67,11 +76,15 @@
 
     "@types/node": ["@types/node@25.0.3", "", { "dependencies": { "undici-types": "~7.16.0" } }, "sha512-W609buLVRVmeW693xKfzHeIV6nJGGz98uCPfeXI1ELMLXVeKYZ9m15fAMSaUPBHYLGFsVRcMmSCksQOrZV9BYA=="],
 
+    "@types/webextension-polyfill": ["@types/webextension-polyfill@0.10.7", "", {}, "sha512-10ql7A0qzBmFB+F+qAke/nP1PIonS0TXZAOMVOxEUsm+lGSW6uwVcISFNa0I4Oyj0884TZVWGGMIWeXOVSNFHw=="],
+
     "bun-types": ["bun-types@1.3.5", "", { "dependencies": { "@types/node": "*" } }, "sha512-inmAYe2PFLs0SUbFOWSVD24sg1jFlMPxOjOSSCYqUgn4Hsc3rDc7dFvfVYjFPNHtov6kgUeulV4SxbuIV/stPw=="],
 
     "typescript": ["typescript@5.9.3", "", { "bin": { "tsc": "bin/tsc", "tsserver": "bin/tsserver" } }, "sha512-jl1vZzPDinLr9eUt3J/t7V6FgNEw9QjvBPdysz9KfQDD41fQrC2Y4vKQdiaUpFT4bXlb1RHhLpp8wtm6M5TgSw=="],
 
     "undici-types": ["undici-types@7.16.0", "", {}, "sha512-Zz+aZWSj8LE6zoxD+xrjh4VfkIG8Ya6LvYkZqtUQGJPZjYl53ypCaUwWqo7eI0x66KBGeRo+mlBEkMSeSZ38Nw=="],
+
+    "webextension-polyfill": ["webextension-polyfill@0.12.0", "", {}, "sha512-97TBmpoWJEE+3nFBQ4VocyCdLKfw54rFaJ6EVQYLBCXqCIpLSZkwGgASpv4oPt9gdKCJ80RJlcmNzNn008Ag6Q=="],
 
     "zod": ["zod@4.1.8", "", {}, "sha512-5R1P+WwQqmmMIEACyzSvo4JXHY5WiAFHRMg+zBZKgKS+Q1viRa0C1hmUKtHltoIFKtIdki3pRxkmpP74jnNYHQ=="],
   }

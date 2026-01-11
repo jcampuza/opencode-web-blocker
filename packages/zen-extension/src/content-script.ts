@@ -1,3 +1,5 @@
+import browser from "webextension-polyfill";
+
 const DEFAULT_BLOCKED_DOMAINS = ["x.com", "twitter.com", "youtube.com"];
 
 let blockedDomains: string[] = DEFAULT_BLOCKED_DOMAINS;
@@ -22,12 +24,6 @@ function formatDuration(seconds: number): string {
   const mins = Math.floor(seconds / 60);
   const secs = seconds % 60;
   return `${mins}:${secs.toString().padStart(2, "0")}`;
-}
-
-function pauseAllMedia() {
-  document.querySelectorAll("video, audio").forEach((media) => {
-    (media as HTMLMediaElement).pause();
-  });
 }
 
 function createModal() {
@@ -147,7 +143,7 @@ function createModal() {
   const overlay = document.createElement("div");
   overlay.className = "overlay";
   overlay.innerHTML = `
-    <svg class="logo" width="200" viewBox="0 0 641 115" fill="none" xmlns="http://www.w3.org/2000/svg"><g clip-path="url(#clip0_modal)"><mask id="mask0_modal" style="mask-type:luminance" maskUnits="userSpaceOnUse" x="0" y="0" width="641" height="115"><path d="M640.714 0H0V115H640.714V0Z" fill="white"/></mask><g mask="url(#mask0_modal)"><path d="M49.2868 82.1433H16.4297V49.2861H49.2868V82.1433Z" fill="#4B4646"/><path d="M49.2857 32.8573H16.4286V82.143H49.2857V32.8573ZM65.7143 98.5716H0V16.4287H65.7143V98.5716Z" fill="#B7B1B1"/><path d="M131.427 82.1433H98.5703V49.2861H131.427V82.1433Z" fill="#4B4646"/><path d="M98.5692 82.143H131.426V32.8573H98.5692V82.143ZM147.855 98.5716H98.5692V115H82.1406V16.4287H147.855V98.5716Z" fill="#B7B1B1"/><path d="M229.997 65.7139V82.1424H180.711V65.7139H229.997Z" fill="#4B4646"/><path d="M230.003 65.7144H180.718V82.143H230.003V98.5716H164.289V16.4287H230.003V65.7144ZM180.718 49.2859H213.575V32.8573H180.718V49.2859Z" fill="#B7B1B1"/><path d="M295.717 98.5718H262.859V49.2861H295.717V98.5718Z" fill="#4B4646"/><path d="M295.715 32.8573H262.858V98.5716H246.43V16.4287H295.715V32.8573ZM312.144 98.5716H295.715V32.8573H312.144V98.5716Z" fill="#B7B1B1"/><path d="M394.286 82.1433H345V49.2861H394.286V82.1433Z" fill="#4B4646"/><path d="M394.285 32.8573H344.999V82.143H394.285V98.5716H328.57V16.4287H394.285V32.8573Z" fill="#F1ECEC"/><path d="M459.998 82.1433H427.141V49.2861H459.998V82.1433Z" fill="#4B4646"/><path d="M459.997 32.8573H427.14V82.143H459.997V32.8573ZM476.425 98.5716H410.711V16.4287H476.425V98.5716Z" fill="#F1ECEC"/><path d="M542.146 82.1433H509.289V49.2861H542.146V82.1433Z" fill="#4B4646"/><path d="M542.145 32.8571H509.288V82.1429H542.145V32.8571ZM558.574 98.5714H492.859V16.4286H542.145V0H558.574V98.5714Z" fill="#F1ECEC"/><path d="M640.715 65.7139V82.1424H591.43V65.7139H640.715Z" fill="#4B4646"/><path d="M591.429 32.8573V49.2859H624.286V32.8573H591.429ZM640.714 65.7144H591.429V82.143H640.714V98.5716H575V16.4287H640.714V65.7144Z" fill="#F1ECEC"/></g></g><defs><clipPath id="clip0_modal"><rect width="640.714" height="115" fill="white"/></clipPath></defs></svg>
+    <svg class="logo" width="200" viewBox="0 0 641 115" fill="none" xmlns="http://www.w3.org/2000/svg"><g clip-path="url(#clip0_modal)"><mask id="mask0_modal" style="mask-type:luminance" maskUnits="userSpaceOnUse" x="0" y="0" width="641" height="115"><path d="M640.714 0H0V115H640.714V0Z" fill="white"/></mask><g mask="url(#mask0_modal)"><path d="M49.2868 82.1433H16.4297V49.2861H49.2868V82.1433Z" fill="#4B4646"/><path d="M49.2857 32.8573H16.4286V82.143H49.2857V32.8573ZM65.7143 98.5716H0V16.4287H65.7143V98.5716Z" fill="#B7B1B1"/><path d="M131.427 82.1433H98.5703V49.2861H131.427V82.1433Z" fill="#4B4646"/><path d="M98.5692 82.143H131.426V32.8573H98.5692V82.143ZM147.855 98.5716H98.5692V115H82.1406V16.4287H147.855V98.5716Z" fill="#B7B1B1"/><path d="M229.997 65.7139V82.1424H180.711V65.7139H229.997Z" fill="#4B4646"/><path d="M230.003 65.7144H180.718V82.143H230.003V98.5716H164.289V16.4287H230.003V65.7144ZM180.718 49.2859H213.575V32.8573H180.718V49.2859Z" fill="#B7B1B1"/><path d="M295.717 98.5718H262.859V49.2861H295.717V98.5718Z" fill="#4B4646"/><path d="M295.715 32.8573H262.858V98.5716H246.43V16.4287H295.715V32.8573ZM312.144 98.5716H295.715V32.8573H312.144V98.5716Z" fill="#B7B1B1"/><path d="M394.286 82.1433H345V49.2861H394.286V82.1433Z" fill="#4B4646"/><path d="M394.285 32.8573H344.999V82.143H394.285V98.5716H328.57V16.4287H394.285V32.8573Z" fill="#F1ECEC"/><path d="M459.998 82.1433H427.141V49.2861H459.998V82.1433Z" fill="#4B4646"/><path d="M459.997 32.8573H427.14V82.143H459.997V32.8573ZM476.425 98.5716H410.711V16.4287H476.425V98.5716Z" fill="#F1ECEC"/><path d="M542.146 82.1433H509.289V49.2861H542.146V82.1433Z" fill="#4B4646"/><path d="M542.145 32.8571H509.288V82.1429H542.145V32.8571ZM558.574 98.5714H492.859V16.4286H542.145V0H558.574V98.5714Z" fill="#F1ECEC"/><path d="M640.715 65.7139V82.1424H591.43V65.7139H640.715Z" fill="#4B4646"/><path d="M591.429 32.8573V49.2859H624.286V32.8573H591.429ZM640.714 65.7144H591.429V82.143H640.714V98.5716H575V16.4287H640.714V65.7144Z" fill="#F1ECEC"/></g></g></svg>
     <div class="title">Get back to work!</div>
     <div class="subtitle" id="message">Waiting for opencode...</div>
     <div class="status">
@@ -166,7 +162,7 @@ function createModal() {
 
   const bypassBtn = shadow.getElementById("bypass-btn") as HTMLButtonElement;
   bypassBtn.addEventListener("click", async () => {
-    const response = await chrome.runtime.sendMessage({ type: "ACTIVATE_BYPASS" });
+    const response = await browser.runtime.sendMessage({ type: "ACTIVATE_BYPASS" });
     if (response.success) {
       removeModal();
     }
@@ -176,7 +172,7 @@ function createModal() {
   retryBtn.addEventListener("click", async () => {
     retryBtn.disabled = true;
     retryBtn.textContent = "Connecting...";
-    await chrome.runtime.sendMessage({ type: "RETRY_CONNECTION" });
+    await browser.runtime.sendMessage({ type: "RETRY_CONNECTION" });
     setTimeout(() => {
       retryBtn.disabled = false;
       retryBtn.textContent = "Retry Connection";
@@ -215,7 +211,6 @@ function updateModalContent(shadow: ShadowRoot) {
       message.textContent = "Your agent finished! Time to review.";
       statusDot.className = "dot connected";
       statusText.textContent = "Connected - Idle";
-      pauseAllMedia();
     } else {
       statusDot.className = "dot connected";
       statusText.textContent = `Working (${currentState.working} active)`;
@@ -328,21 +323,21 @@ function updateUI() {
   }
 }
 
-chrome.storage.sync.get(["blockedDomains"], (result) => {
+browser.storage.sync.get(["blockedDomains"]).then((result) => {
   if (result.blockedDomains) {
     blockedDomains = result.blockedDomains;
   }
   updateUI();
 });
 
-chrome.storage.onChanged.addListener((changes) => {
+browser.storage.onChanged.addListener((changes) => {
   if (changes.blockedDomains) {
     blockedDomains = changes.blockedDomains.newValue || DEFAULT_BLOCKED_DOMAINS;
     updateUI();
   }
 });
 
-chrome.runtime.onMessage.addListener((message) => {
+browser.runtime.onMessage.addListener((message) => {
   if (message.type === "STATE") {
     currentState = {
       blocked: message.blocked,
@@ -356,7 +351,7 @@ chrome.runtime.onMessage.addListener((message) => {
   }
 });
 
-chrome.runtime.sendMessage({ type: "GET_STATE" }).then((state) => {
+browser.runtime.sendMessage({ type: "GET_STATE" }).then((state) => {
   if (state) {
     currentState = {
       blocked: state.blocked,
