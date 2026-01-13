@@ -1,6 +1,6 @@
-const DEFAULT_BLOCKED_DOMAINS = ["x.com", "twitter.com", "youtube.com"];
+import { DEFAULT_BLOCKED_DOMAINS } from "@jcamps/opencode-web-blocker-shared";
 
-let blockedDomains: string[] = DEFAULT_BLOCKED_DOMAINS;
+let blockedDomains: string[] = [...DEFAULT_BLOCKED_DOMAINS];
 let modalContainer: HTMLElement | null = null;
 let modalShadow: ShadowRoot | null = null;
 let toastContainer: HTMLElement | null = null;

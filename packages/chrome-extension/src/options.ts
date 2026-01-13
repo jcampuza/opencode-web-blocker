@@ -1,6 +1,6 @@
-const DEFAULT_BLOCKED_DOMAINS = ["x.com", "twitter.com", "youtube.com"];
-const DEFAULT_BYPASS_DURATION = 300;
-const DEFAULT_SERVER_PORT = 8765;
+import { DEFAULT_PORT, DEFAULT_BLOCKED_DOMAINS, BYPASS_DURATION_MS } from "@jcamps/opencode-web-blocker-shared";
+
+const DEFAULT_BYPASS_DURATION = BYPASS_DURATION_MS / 1000;
 
 const domainList = document.getElementById("domain-list") as HTMLUListElement;
 const newDomainInput = document.getElementById("new-domain") as HTMLInputElement;
@@ -13,7 +13,7 @@ const serverPortInput = document.getElementById("server-port") as HTMLInputEleme
 
 let blockedDomains: string[] = [];
 let bypassDuration: number = DEFAULT_BYPASS_DURATION;
-let serverPort: number = DEFAULT_SERVER_PORT;
+let serverPort: number = DEFAULT_PORT;
 
 function isValidDomain(domain: string): boolean {
   const regex = /^[a-z0-9]([a-z0-9-]*[a-z0-9])?(\.[a-z0-9]([a-z0-9-]*[a-z0-9])?)*\.[a-z]{2,}$/;
@@ -98,7 +98,7 @@ function updateBypassUI(bypassUntil: number | null) {
 chrome.storage.sync.get(["blockedDomains", "bypassDuration", "serverPort"], (result) => {
   blockedDomains = result.blockedDomains || DEFAULT_BLOCKED_DOMAINS;
   bypassDuration = result.bypassDuration || DEFAULT_BYPASS_DURATION;
-  serverPort = result.serverPort || DEFAULT_SERVER_PORT;
+  serverPort = result.serverPort || DEFAULT_PORT;
   bypassDurationInput.value = String(bypassDuration);
   serverPortInput.value = String(serverPort);
   renderDomains();

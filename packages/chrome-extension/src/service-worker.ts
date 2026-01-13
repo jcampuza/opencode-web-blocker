@@ -1,9 +1,8 @@
-const DEFAULT_PORT = 8765;
+import { DEFAULT_PORT, DEFAULT_BLOCKED_DOMAINS, BYPASS_DURATION_MS } from "@jcamps/opencode-web-blocker-shared";
+
 const KEEPALIVE_INTERVAL = 20000;
 const RECONNECT_DELAY_BASE = 1000;
 const RECONNECT_DELAY_MAX = 30000;
-const DEFAULT_BLOCKED_DOMAINS = ["x.com", "twitter.com", "youtube.com"];
-const BYPASS_DURATION_MS = 10 * 1000;
 
 let serverPort = DEFAULT_PORT;
 

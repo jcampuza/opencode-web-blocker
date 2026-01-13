@@ -9,6 +9,9 @@
     "dev:watch": "bun build src/service-worker.ts src/content-script.ts src/popup.ts src/options.ts --outdir=dist --watch",
     "check": "tsc --noEmit"
   },
+  "dependencies": {
+    "@jcamps/opencode-web-blocker-shared": "workspace:*"
+  },
   "devDependencies": {
     "@types/chrome": "^0.0.287"
   }

@@ -42,7 +42,8 @@
     "@jcamps/opencode-web-blocker-shared": "workspace:*"
   },
   "devDependencies": {
-    "@opencode-ai/plugin": "*",
+    "@opencode-ai/plugin": "1.1.2",
+    "@opencode-ai/sdk": "1.1.2",
     "typescript": "^5"
   }
 }

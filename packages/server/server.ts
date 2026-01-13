@@ -3,15 +3,41 @@ import type { HookPayload } from '@jcamps/opencode-web-blocker-shared';
 import { DEFAULT_PORT } from '@jcamps/opencode-web-blocker-shared';
 import type { ServerWebSocket } from 'bun';
 
+type LogLevel = 'info' | 'debug' | 'warn' | 'error';
+
+interface LogEntry {
+  timestamp: string;
+  level: LogLevel;
+  event: string;
+  source: string;
+  metadata?: Record<string, unknown>;
+}
+
+function log(
+  event: string,
+  source: string,
+  level: LogLevel = 'info',
+  metadata?: Record<string, unknown>
+) {
+  const entry: LogEntry = {
+    timestamp: new Date().toISOString(),
+    level,
+    event,
+    source,
+    metadata,
+  };
+  console.log(JSON.stringify(entry));
+}
+
+const corsHeaders = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+  'Access-Control-Allow-Headers': 'Content-Type',
+};
+
 export function startServer(port: number = DEFAULT_PORT) {
   const state = new SessionState();
   const clients = new Set<ServerWebSocket>();
-
-  const corsHeaders = {
-    'Access-Control-Allow-Origin': '*',
-    'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
-    'Access-Control-Allow-Headers': 'Content-Type',
-  };
 
   const server = Bun.serve({
     port,
@@ -35,6 +61,12 @@ export function startServer(port: number = DEFAULT_PORT) {
       if (url.pathname === '/hook' && req.method === 'POST') {
         return (async () => {
           const payload = (await req.json()) as HookPayload;
+          log('hook_received', 'http', 'info', {
+            session_id: payload.session_id,
+            hook_event_name: payload.hook_event_name,
+            tool_name: payload.tool_name,
+            cwd: payload.cwd,
+          });
           state.handleHook(payload);
           return new Response('OK', { headers: corsHeaders });
         })();
@@ -47,11 +79,12 @@ export function startServer(port: number = DEFAULT_PORT) {
       open(ws) {
         clients.add(ws);
         ws.send(JSON.stringify({ type: 'state', ...state.getPublicState() }));
-        console.log('Extension connected');
+        log('extension_connected', 'websocket', 'info');
       },
       message(ws, message) {
         try {
           const data = JSON.parse(String(message));
+          log('websocket_message', 'websocket', 'debug', { type: data.type });
           if (data.type === 'ping') {
             ws.send(JSON.stringify({ type: 'pong' }));
           }
@@ -59,7 +92,7 @@ export function startServer(port: number = DEFAULT_PORT) {
       },
       close(ws) {
         clients.delete(ws);
-        console.log('Extension disconnected');
+        log('extension_disconnected', 'websocket', 'info');
       },
     },
   });

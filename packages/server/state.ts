@@ -69,16 +69,13 @@ export class SessionState {
         break;
 
       case 'PreToolUse':
-        if (tool_name && USER_INPUT_TOOLS.includes(tool_name)) {
-          this.updateSession(session_id, 'waiting_for_input');
-        } else {
-          setTimeout(() => {
-            const session = this.sessions.get(session_id);
-            if (session?.status === 'waiting_for_input') {
-              this.updateSession(session_id, 'working');
-            }
-          }, 500);
+        if (!tool_name || !USER_INPUT_TOOLS.includes(tool_name)) {
+          return;
         }
+        this.updateSession(session_id, 'waiting_for_input');
+        break;
+
+      case 'PostToolUse':
         break;
     }
 
@@ -109,7 +106,6 @@ export class SessionState {
   }
 
   destroy() {
-    const n = 1;
     clearInterval(this.cleanupInterval);
   }
 }
