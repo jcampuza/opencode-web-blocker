@@ -75,6 +75,62 @@
     .block-status.open {
       background: #14532d;
     }
+    .block-status.disabled {
+      background: #1f2937;
+    }
+    .toggle-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: #1a1a1a;
+      padding: 10px 12px;
+      border-left: 1px solid transparent;
+      margin-bottom: 16px;
+      transition: border-color 0.15s ease;
+    }
+    .toggle-row:focus-within {
+      border-left-color: cyan;
+    }
+    .toggle-label {
+      font-size: 12px;
+      letter-spacing: 0.02em;
+      text-transform: uppercase;
+      opacity: 0.7;
+    }
+    .toggle-control {
+      position: relative;
+      width: 42px;
+      height: 22px;
+    }
+    .toggle-control input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+    .toggle-slider {
+      position: absolute;
+      inset: 0;
+      background: #444;
+      border-radius: 999px;
+      transition: background 0.2s ease;
+    }
+    .toggle-slider::after {
+      content: "";
+      position: absolute;
+      width: 18px;
+      height: 18px;
+      left: 2px;
+      top: 2px;
+      background: #f2eded;
+      border-radius: 50%;
+      transition: transform 0.2s ease;
+    }
+    .toggle-control input:checked + .toggle-slider {
+      background: #22c55e;
+    }
+    .toggle-control input:checked + .toggle-slider::after {
+      transform: translateX(20px);
+    }
     .settings-btn {
       width: 100%;
       padding: 10px;
@@ -109,6 +165,14 @@
   
   <div class="block-status" id="block-status">
     <span id="block-text">Loading...</span>
+  </div>
+
+  <div class="toggle-row">
+    <div class="toggle-label">Extension Enabled</div>
+    <label class="toggle-control">
+      <input type="checkbox" id="extension-toggle">
+      <span class="toggle-slider"></span>
+    </label>
   </div>
   
   <button class="settings-btn" id="settings-btn">Settings</button>

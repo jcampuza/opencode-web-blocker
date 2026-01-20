@@ -10,10 +10,17 @@ const bypassBtn = document.getElementById("bypass-btn") as HTMLButtonElement;
 const bypassStatus = document.getElementById("bypass-status") as HTMLDivElement;
 const bypassDurationInput = document.getElementById("bypass-duration") as HTMLInputElement;
 const serverPortInput = document.getElementById("server-port") as HTMLInputElement;
+const extensionToggle = document.getElementById("extension-toggle") as HTMLInputElement;
 
 let blockedDomains: string[] = [];
 let bypassDuration: number = DEFAULT_BYPASS_DURATION;
 let serverPort: number = DEFAULT_PORT;
+let extensionEnabled = true;
+
+function updateExtensionToggle(value: boolean) {
+  extensionEnabled = value;
+  extensionToggle.checked = value;
+}
 
 function isValidDomain(domain: string): boolean {
   const regex = /^[a-z0-9]([a-z0-9-]*[a-z0-9])?(\.[a-z0-9]([a-z0-9-]*[a-z0-9])?)*\.[a-z]{2,}$/;
@@ -95,12 +102,14 @@ function updateBypassUI(bypassUntil: number | null) {
   }
 }
 
-chrome.storage.sync.get(["blockedDomains", "bypassDuration", "serverPort"], (result) => {
+chrome.storage.sync.get(["blockedDomains", "bypassDuration", "serverPort", "extensionEnabled"], (result) => {
   blockedDomains = result.blockedDomains || DEFAULT_BLOCKED_DOMAINS;
   bypassDuration = result.bypassDuration || DEFAULT_BYPASS_DURATION;
   serverPort = result.serverPort || DEFAULT_PORT;
+  extensionEnabled = result.extensionEnabled ?? true;
   bypassDurationInput.value = String(bypassDuration);
   serverPortInput.value = String(serverPort);
+  updateExtensionToggle(extensionEnabled);
   renderDomains();
   updateBypassUI(null);
 });
@@ -108,6 +117,12 @@ chrome.storage.sync.get(["blockedDomains", "bypassDuration", "serverPort"], (res
 chrome.runtime.sendMessage({ type: "GET_STATE" }).then((response) => {
   if (response) {
     updateBypassUI(response.bypassUntil);
+  }
+});
+
+chrome.storage.sync.get(["extensionEnabled"], (result) => {
+  if (result.extensionEnabled !== undefined) {
+    updateExtensionToggle(result.extensionEnabled);
   }
 });
 
@@ -131,6 +146,18 @@ serverPortInput.addEventListener("change", () => {
     serverPort = value;
     chrome.storage.sync.set({ serverPort });
     chrome.runtime.sendMessage({ type: "RETRY_CONNECTION" });
+  }
+});
+
+extensionToggle.addEventListener("change", () => {
+  updateExtensionToggle(extensionToggle.checked);
+  chrome.storage.sync.set({ extensionEnabled });
+});
+
+chrome.storage.onChanged.addListener((changes, areaName) => {
+  if (areaName !== "sync") return;
+  if (changes.extensionEnabled) {
+    updateExtensionToggle(changes.extensionEnabled.newValue ?? true);
   }
 });
 

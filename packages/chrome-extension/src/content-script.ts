@@ -4,6 +4,7 @@ let blockedDomains: string[] = [...DEFAULT_BLOCKED_DOMAINS];
 let modalContainer: HTMLElement | null = null;
 let modalShadow: ShadowRoot | null = null;
 let toastContainer: HTMLElement | null = null;
+let toastMode: "question" | "bypass" | null = null;
 let currentState = {
   blocked: true,
   serverConnected: false,
@@ -11,6 +12,7 @@ let currentState = {
   waitingForInput: 0,
   bypassActive: false,
   bypassDuration: 300,
+  extensionEnabled: true,
 };
 
 function isBlockedDomain(): boolean {
@@ -224,11 +226,15 @@ function removeModal() {
   }
 }
 
-function createToast() {
-  if (toastContainer) return;
+function createToast(mode: "question" | "bypass") {
+  if (toastContainer && toastMode === mode) return;
+  if (toastContainer) {
+    removeToast();
+  }
 
   toastContainer = document.createElement("div");
   toastContainer.id = "opencode-blocker-toast";
+  toastMode = mode;
 
   const shadow = toastContainer.attachShadow({ mode: "closed" });
 
@@ -254,7 +260,6 @@ function createToast() {
       width: 8px;
       height: 8px;
       border-radius: 50%;
-      background: #fbbf24;
       animation: pulse 1.5s infinite;
     }
     @keyframes pulse {
@@ -275,11 +280,16 @@ function createToast() {
     }
   `;
 
+  const messageText = mode === "question"
+    ? "opencode has a question for you!"
+    : "Bypass mode is active";
+  const pulseColor = mode === "question" ? "#fbbf24" : "#38bdf8";
+
   const toast = document.createElement("div");
   toast.className = "toast";
   toast.innerHTML = `
-    <div class="pulse"></div>
-    <span>opencode has a question for you!</span>
+    <div class="pulse" style="background: ${pulseColor}"></div>
+    <span>${messageText}</span>
     <button class="close">×</button>
   `;
 
@@ -298,10 +308,17 @@ function removeToast() {
   if (toastContainer) {
     toastContainer.remove();
     toastContainer = null;
+    toastMode = null;
   }
 }
 
 function updateUI() {
+  if (!currentState.extensionEnabled) {
+    removeModal();
+    removeToast();
+    return;
+  }
+
   if (!isBlockedDomain()) {
     removeModal();
     removeToast();
@@ -314,23 +331,37 @@ function updateUI() {
     removeModal();
   }
 
-  if (currentState.waitingForInput > 0 && !currentState.blocked) {
-    createToast();
+  if (!currentState.blocked) {
+    if (currentState.waitingForInput > 0) {
+      createToast("question");
+    } else if (currentState.bypassActive) {
+      createToast("bypass");
+    } else {
+      removeToast();
+    }
   } else {
     removeToast();
   }
 }
 
-chrome.storage.sync.get(["blockedDomains"], (result) => {
+chrome.storage.sync.get(["blockedDomains", "extensionEnabled"], (result) => {
   if (result.blockedDomains) {
     blockedDomains = result.blockedDomains;
+  }
+  if (result.extensionEnabled !== undefined) {
+    currentState.extensionEnabled = result.extensionEnabled;
   }
   updateUI();
 });
 
-chrome.storage.onChanged.addListener((changes) => {
+chrome.storage.onChanged.addListener((changes, areaName) => {
+  if (areaName !== "sync") return;
   if (changes.blockedDomains) {
     blockedDomains = changes.blockedDomains.newValue || DEFAULT_BLOCKED_DOMAINS;
+    updateUI();
+  }
+  if (changes.extensionEnabled) {
+    currentState.extensionEnabled = changes.extensionEnabled.newValue ?? true;
     updateUI();
   }
 });
@@ -344,6 +375,7 @@ chrome.runtime.onMessage.addListener((message) => {
       waitingForInput: message.waitingForInput,
       bypassActive: message.bypassActive,
       bypassDuration: message.bypassDuration || 300,
+      extensionEnabled: message.extensionEnabled ?? true,
     };
     updateUI();
   }
@@ -358,6 +390,7 @@ chrome.runtime.sendMessage({ type: "GET_STATE" }).then((state) => {
       waitingForInput: state.waitingForInput,
       bypassActive: state.bypassActive,
       bypassDuration: state.bypassDuration || 300,
+      extensionEnabled: state.extensionEnabled ?? true,
     };
     updateUI();
   }

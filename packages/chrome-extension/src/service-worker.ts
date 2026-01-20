@@ -5,6 +5,7 @@ const RECONNECT_DELAY_BASE = 1000;
 const RECONNECT_DELAY_MAX = 30000;
 
 let serverPort = DEFAULT_PORT;
+let extensionEnabled = true;
 
 function getWsUrl(): string {
   return `ws://localhost:${serverPort}/ws`;
@@ -38,7 +39,7 @@ let bypassTimeout: ReturnType<typeof setTimeout> | null = null;
 async function getPublicState() {
   const bypassActive = state.bypassUntil !== null && state.bypassUntil > Date.now();
   const isIdle = state.working === 0 && state.waitingForInput === 0;
-  const shouldBlock = !bypassActive && (isIdle || !state.serverConnected);
+  const shouldBlock = extensionEnabled && !bypassActive && (isIdle || !state.serverConnected);
 
   const storage = await chrome.storage.sync.get(["bypassDuration"]);
   const bypassDuration = storage.bypassDuration || BYPASS_DURATION_MS / 1000;
@@ -52,6 +53,7 @@ async function getPublicState() {
     bypassActive,
     bypassUntil: state.bypassUntil,
     bypassDuration,
+    extensionEnabled,
   };
 }
 
@@ -116,12 +118,24 @@ function connect() {
   };
 }
 
-chrome.storage.sync.get(["blockedDomains", "serverPort"], (result) => {
+chrome.storage.sync.get(["blockedDomains", "serverPort", "extensionEnabled"], (result) => {
   if (!result.blockedDomains) {
     chrome.storage.sync.set({ blockedDomains: DEFAULT_BLOCKED_DOMAINS });
   }
+  if (result.extensionEnabled === undefined) {
+    chrome.storage.sync.set({ extensionEnabled: true });
+  }
   serverPort = result.serverPort || DEFAULT_PORT;
+  extensionEnabled = result.extensionEnabled ?? true;
   connect();
+});
+
+chrome.storage.onChanged.addListener((changes, areaName) => {
+  if (areaName !== "sync") return;
+  if (changes.extensionEnabled) {
+    extensionEnabled = changes.extensionEnabled.newValue ?? true;
+    broadcast();
+  }
 });
 
 async function fetchServerStatus(): Promise<{ working: number; waitingForInput: number; sessions: number; blocked: boolean } | null> {
